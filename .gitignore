@@ -169,6 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-
+.csv
+/output
 # node_modules
 node_modules/

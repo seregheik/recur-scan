@@ -12,8 +12,8 @@ import argparse
 import random
 import sys
 
-import pandas as pd
-from loguru import logger
+import pandas as pd  # type: ignore
+from loguru import logger  # type: ignore
 
 # %%
 # configure script arguments
@@ -100,7 +100,7 @@ transactions_df = transactions_df.rename(
         "transaction_timestamp": "date",
         "transaction_amount": "amount",
     }
-)
+)  # type: ignore
 # convert the date from various formats to YYYY-MM-DD
 try:
     transactions_df["date"] = pd.to_datetime(transactions_df["date"], format="mixed", utc=True).dt.date.astype(str)
@@ -201,14 +201,14 @@ print("constraints satisfied")
 # print the number of transactions for each labeler
 
 for labeler in range(n_labelers):
-    print(f"{labeler} has {sum(user_id_to_n_transactions[uid] for uid in labeler_to_user_ids[labeler])} transactions")
+    print(f"{labeler} has {sum(user_id_to_n_transactions[uid] for uid in labeler_to_user_ids[labeler])} transactions")  # type: ignore
 
 # %%
 # create files for each labeler containing the transactions for the accounts assigned to the labeler
 
 for labeler in range(n_labelers):
     # get transactions for this labeler's assigned user_ids
-    labeler_df = transactions_df[transactions_df["user_id"].isin(labeler_to_user_ids[labeler])]
+    labeler_df = transactions_df[transactions_df["user_id"].isin(labeler_to_user_ids[labeler])]  # type: ignore
     # sort by user_id, name, date, amount
     labeler_df = labeler_df.sort_values(["user_id", "name", "date", "amount"])
     # save the dataframe to a csv file

@@ -12,15 +12,15 @@ import argparse
 import json
 import os
 
-import joblib
-from loguru import logger
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction import DictVectorizer
-from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
-from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold
+import joblib  # type: ignore
+from loguru import logger  # type: ignore
+from sklearn.ensemble import RandomForestClassifier  # type: ignore
+from sklearn.feature_extraction import DictVectorizer  # type: ignore
+from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score  # type: ignore
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold  # type: ignore
 
-from recur_scan.features import get_features
-from recur_scan.transactions import group_transactions, read_labeled_transactions, write_transactions
+from recur_scan.features import get_features  # type: ignore
+from recur_scan.transactions import group_transactions, read_labeled_transactions, write_transactions  # type: ignore
 
 # %%
 # configure the script
@@ -28,8 +28,8 @@ from recur_scan.transactions import group_transactions, read_labeled_transaction
 n_cv_folds = 3  # number of cross-validation folds, could be 5
 n_hpo_iters = 20  # number of hyperparameter optimization iterations
 
-in_path = "your csv file goes here"
-out_dir = "your output directory goes here"
+in_path = "Osasere-labeler_30.csv"
+out_dir = "output/"
 
 # %%
 # parse script arguments from command line

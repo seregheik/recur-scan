@@ -13,8 +13,8 @@ from collections import defaultdict
 from datetime import date
 from typing import Any
 
-import pandas as pd
-from loguru import logger
+import pandas as pd  # type: ignore
+from loguru import logger  # type: ignore
 
 # %%
 
@@ -43,9 +43,9 @@ for file in files:
         logger.error(f"Error converting amount to float in file {file}:")
         logger.error(e)
         # Get the problematic rows
-        mask = pd.to_numeric(df["amount"], errors="coerce").isna()
+        mask = pd.to_numeric(df["amount"], errors="coerce").isna()  # type: ignore
         logger.error("\nProblematic rows:")
-        logger.error(df[mask])
+        logger.error(df[mask])  # type: ignore
 
     # Now read with proper dtypes
     df = pd.read_csv(
@@ -55,11 +55,11 @@ for file in files:
     # create a dictionary whose key is "user_id/name" and whose value is a list of (amount, recurring) tuples
     labels: dict[str, list[tuple[str, float, str]]] = defaultdict(list)
     for _, row in df.iterrows():
-        user_id: str = row["user_id"]
-        name: str = row["name"]
-        _date: str = row["date"]
-        amount: float = row["amount"]
-        recurring: str = row["recurring"].strip() if pd.notna(row["recurring"]) else ""
+        user_id: str = row["user_id"]  # type: ignore
+        name: str = row["name"]  # type: ignore
+        _date: str = row["date"]  # type: ignore
+        amount: float = row["amount"]  # type: ignore
+        recurring: str = row["recurring"].strip() if pd.notna(row["recurring"]) else ""  # type: ignore
         labels[f"{user_id}/{name}"].append((_date, amount, recurring))
     # keep only the labels where at least one of the recurring values is a '?'
     labels = {k: v for k, v in labels.items() if any(recurring == "?" for _, _, recurring in v)}
