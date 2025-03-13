@@ -173,3 +173,5 @@ cython_debug/
 /output
 # node_modules
 node_modules/
+*.csv
+/scripts/output
