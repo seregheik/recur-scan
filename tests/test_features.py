@@ -19,17 +19,33 @@ from recur_scan.transactions import Transaction
 def transactions():
     """Fixture providing test transactions."""
     return [
-        Transaction(id=1, user_id="user1", name="Allstate Insurance", amount=100, date="2024-01-01"),
+        Transaction(
+            id=1,
+            user_id="user1",
+            name="Allstate Insurance",
+            amount=100,
+            date="2024-01-01",
+        ),
         Transaction(id=2, user_id="user1", name="AT&T", amount=100, date="2024-01-01"),
         Transaction(id=3, user_id="user1", name="Duke Energy", amount=200, date="2024-01-02"),
-        Transaction(id=4, user_id="user1", name="HighEnergy Soft Drinks", amount=2.99, date="2024-01-03"),
+        Transaction(
+            id=4,
+            user_id="user1",
+            name="HighEnergy Soft Drinks",
+            amount=2.99,
+            date="2024-01-03",
+        ),
+        Transaction(id=1, user_id="user1", name="vendor1", amount=100, date="2024-01-01"),
+        Transaction(id=2, user_id="user1", name="vendor1", amount=100, date="2024-01-02"),
+        Transaction(id=3, user_id="user1", name="dadutilities", amount=200, date="2024-01-03"),
+        # Transaction(id=4, user_id="user1", name="dadutilities", amount=200, date="2024-01-03"),
     ]
 
 
 def test_get_n_transactions_same_amount(transactions) -> None:
     """Test that get_n_transactions_same_amount returns the correct number of transactions with the same amount."""
-    assert get_n_transactions_same_amount(transactions[0], transactions) == 2
-    assert get_n_transactions_same_amount(transactions[2], transactions) == 1
+    assert get_n_transactions_same_amount(transactions[0], transactions) == 4
+    assert get_n_transactions_same_amount(transactions[2], transactions) == 2
 
 
 def test_get_percent_transactions_same_amount(transactions) -> None:
@@ -91,3 +107,4 @@ def test_get_is_utility(transactions) -> None:
     """Test get_is_utility."""
     assert get_is_utility(transactions[2])
     assert not get_is_utility(transactions[3])
+    assert pytest.approx(get_percent_transactions_same_amount(transactions[0], transactions)) == 4 / 7

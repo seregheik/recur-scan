@@ -29,8 +29,8 @@ n_cv_folds = 3  # number of cross-validation folds, could be 5
 do_hyperparameter_optimization = True  # set to False to use the default hyperparameters
 n_hpo_iters = 20  # number of hyperparameter optimization iterations
 
-in_path = "Osasere-labeler_30.csv"
-out_dir = "output/"
+in_path = "../data/Osasere-labeler_30.csv"
+out_dir = "../output/"
 
 # %%
 # parse script arguments from command line
@@ -103,11 +103,17 @@ if do_hyperparameter_optimization:
 else:
     # default hyperparameters
     best_params = {
-        "n_estimators": 100,
-        "min_samples_split": 10,
-        "min_samples_leaf": 1,
+        # "n_estimators": 100,
+        # "min_samples_split": 10,
+        # "min_samples_leaf": 1,
+        # "max_features": "sqrt",
+        # "max_depth": None,
+        # "bootstrap": False,
+        "n_estimators": 500,
+        "min_samples_split": 5,
+        "min_samples_leaf": 3,
         "max_features": "sqrt",
-        "max_depth": None,
+        "max_depth": 20,
         "bootstrap": False,
     }
 

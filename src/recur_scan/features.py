@@ -27,7 +27,7 @@ def get_is_utility(transaction: Transaction) -> bool:
     """Check if the transaction is a utility payment."""
     # use a regular expression with boundaries to match case-insensitive utility
     # and utility-related terms
-    match = re.search(r"\b(utility|utilit|energy)\b", transaction.name, re.IGNORECASE)
+    match = re.search(r"\b(utility|util|energ)\b", transaction.name, re.IGNORECASE)
     return bool(match)
 
 
@@ -106,6 +106,14 @@ def get_percent_transactions_same_amount(transaction: Transaction, all_transacti
     return n_same_amount / len(all_transactions)
 
 
+def get_total_insurance_transaction(transaction: Transaction, all_transactions: list[Transaction]) -> int:
+    """Get the total transaction from billing having insurance"""
+    total = 0
+    if [t for t in all_transactions if "insur" in t.name if t.name == transaction.name]:
+        total += 1
+    return total
+
+
 def get_features(transaction: Transaction, all_transactions: list[Transaction]) -> dict[str, float | int]:
     return {
         "n_transactions_same_amount": get_n_transactions_same_amount(transaction, all_transactions),
@@ -123,4 +131,5 @@ def get_features(transaction: Transaction, all_transactions: list[Transaction]) 
         "is_utility": get_is_utility(transaction),
         "is_phone": get_is_phone(transaction),
         "is_always_recurring": get_is_always_recurring(transaction),
+        "total_bills_having_insurance": get_total_insurance_transaction(transaction, all_transactions),
     }
