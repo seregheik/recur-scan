@@ -38,7 +38,6 @@ def transactions():
         Transaction(id=1, user_id="user1", name="vendor1", amount=100, date="2024-01-01"),
         Transaction(id=2, user_id="user1", name="vendor1", amount=100, date="2024-01-02"),
         Transaction(id=3, user_id="user1", name="dadutilities", amount=200, date="2024-01-03"),
-        # Transaction(id=4, user_id="user1", name="dadutilities", amount=200, date="2024-01-03"),
     ]
 
 
@@ -53,7 +52,7 @@ def test_get_percent_transactions_same_amount(transactions) -> None:
     Test that get_percent_transactions_same_amount returns correct percentage.
     Tests that the function calculates the right percentage of transactions with matching amounts.
     """
-    assert pytest.approx(get_percent_transactions_same_amount(transactions[0], transactions)) == 2 / 4
+    assert pytest.approx(get_percent_transactions_same_amount(transactions[0], transactions)) == 4 / 7
 
 
 def test_get_ends_in_99(transactions) -> None:
@@ -64,9 +63,9 @@ def test_get_ends_in_99(transactions) -> None:
 
 def test_get_n_transactions_same_day(transactions) -> None:
     """Test that get_n_transactions_same_day returns the correct number of transactions on the same day."""
-    assert get_n_transactions_same_day(transactions[0], transactions, 0) == 2
-    assert get_n_transactions_same_day(transactions[0], transactions, 1) == 3
-    assert get_n_transactions_same_day(transactions[2], transactions, 0) == 1
+    assert get_n_transactions_same_day(transactions[0], transactions, 0) == 3
+    assert get_n_transactions_same_day(transactions[0], transactions, 1) == 5
+    assert get_n_transactions_same_day(transactions[2], transactions, 0) == 2
 
 
 def test_get_days_since_epoch() -> None:

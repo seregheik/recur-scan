@@ -27,7 +27,7 @@ def get_is_utility(transaction: Transaction) -> bool:
     """Check if the transaction is a utility payment."""
     # use a regular expression with boundaries to match case-insensitive utility
     # and utility-related terms
-    match = re.search(r"\b(utility|util|energ)\b", transaction.name, re.IGNORECASE)
+    match = re.search(r"[ ](util|ener)", transaction.name, re.IGNORECASE)
     return bool(match)
 
 
@@ -114,6 +114,54 @@ def get_total_insurance_transaction(transaction: Transaction, all_transactions: 
     return total
 
 
+def get_likelyhood_of_recurring(transaction: Transaction, all_transactions: list[Transaction]) -> float:
+    """Get the likelyhood of a transaction being recurring if it is same user and same amount as previous
+    transaction and one month apart from the previous transaction with allowance for up to 3 days off
+    """
+    n_same_amount = get_n_transactions_same_amount(transaction, all_transactions)
+    n_same_day = get_n_transactions_same_day(transaction, all_transactions, 0)
+    n_same_day_off_by_1 = get_n_transactions_same_day(transaction, all_transactions, 1)
+    n_same_day_off_by_2 = get_n_transactions_same_day(transaction, all_transactions, 2)
+    n_same_day_off_by_3 = get_n_transactions_same_day(transaction, all_transactions, 3)
+    n_14_days_apart_exact = get_n_transactions_days_apart(transaction, all_transactions, 14, 0)
+    n_14_days_apart_off_by_1 = get_n_transactions_days_apart(transaction, all_transactions, 14, 1)
+    n_14_days_apart_off_by_2 = get_n_transactions_days_apart(transaction, all_transactions, 14, 2)
+    n_14_days_apart_off_by_3 = get_n_transactions_days_apart(transaction, all_transactions, 14, 3)
+    n_7_days_apart_exact = get_n_transactions_days_apart(transaction, all_transactions, 7, 0)
+    n_7_days_apart_off_by_1 = get_n_transactions_days_apart(transaction, all_transactions, 7, 1)
+    n_7_days_apart_off_by_2 = get_n_transactions_days_apart(transaction, all_transactions, 7, 2)
+    n_7_days_apart_off_by_3 = get_n_transactions_days_apart(transaction, all_transactions, 7, 3)
+    score = 0
+
+    if n_same_amount > 1:
+        score += 1
+    if n_same_day > 1:
+        score += 1
+    if n_same_day_off_by_1 > 1:
+        score += 1
+    if n_same_day_off_by_2 > 1:
+        score += 1
+    if n_same_day_off_by_3 > 1:
+        score += 1
+    if n_14_days_apart_exact > 1:
+        score += 1
+    if n_14_days_apart_off_by_1 > 1:
+        score += 1
+    if n_14_days_apart_off_by_2 > 1:
+        score += 1
+    if n_14_days_apart_off_by_3 > 1:
+        score += 1
+    if n_7_days_apart_exact > 1:
+        score += 1
+    if n_7_days_apart_off_by_1 > 1:
+        score += 1
+    if n_7_days_apart_off_by_2 > 1:
+        score += 1
+    if n_7_days_apart_off_by_3 > 1:
+        score += 1
+    return score / 13
+
+
 def get_features(transaction: Transaction, all_transactions: list[Transaction]) -> dict[str, float | int]:
     return {
         "n_transactions_same_amount": get_n_transactions_same_amount(transaction, all_transactions),
@@ -132,4 +180,5 @@ def get_features(transaction: Transaction, all_transactions: list[Transaction]) 
         "is_phone": get_is_phone(transaction),
         "is_always_recurring": get_is_always_recurring(transaction),
         "total_bills_having_insurance": get_total_insurance_transaction(transaction, all_transactions),
+        "likelyhood_of_recurring": get_likelyhood_of_recurring(transaction, all_transactions),
     }
