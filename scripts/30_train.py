@@ -20,10 +20,18 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_selection import RFECV
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
-from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, train_test_split
+from sklearn.model_selection import (
+    RandomizedSearchCV,
+    StratifiedKFold,
+    train_test_split,
+)
 
 from recur_scan.features import get_features
-from recur_scan.transactions import group_transactions, read_labeled_transactions, write_transactions
+from recur_scan.transactions import (
+    group_transactions,
+    read_labeled_transactions,
+    write_transactions,
+)
 
 # %%
 # configure the script
@@ -33,14 +41,19 @@ do_hyperparameter_optimization = False  # set to False to use the default hyperp
 n_hpo_iters = 20  # number of hyperparameter optimization iterations
 n_jobs = -1  # number of jobs to run in parallel (set to 1 if your laptop gets too hot)
 
-in_path = "training file goes here"
-out_dir = "output directory goes here"
+in_path = "../../recur-scan-data/csv/recur_scan_train - train.csv"
+out_dir = "../../recur-scan-data/reports/"
 
 # %%
 # parse script arguments from command line
 parser = argparse.ArgumentParser(description="Train a model to identify recurring transactions.")
 parser.add_argument("--f", help="ignore; used by ipykernel_launcher")
-parser.add_argument("--input", type=str, default=in_path, help="Path to the input CSV file containing transactions.")
+parser.add_argument(
+    "--input",
+    type=str,
+    default=in_path,
+    help="Path to the input CSV file containing transactions.",
+)
 parser.add_argument("--output", type=str, default=out_dir, help="Path to the output directory.")
 args = parser.parse_args()
 in_path = args.input
@@ -98,7 +111,13 @@ if do_hyperparameter_optimization:
     # Random search
     model = RandomForestClassifier(random_state=42, n_jobs=n_jobs)
     random_search = RandomizedSearchCV(
-        model, param_dist, n_iter=n_hpo_iters, cv=n_cv_folds, scoring="f1", n_jobs=n_jobs, verbose=3
+        model,
+        param_dist,
+        n_iter=n_hpo_iters,
+        cv=n_cv_folds,
+        scoring="f1",
+        n_jobs=n_jobs,
+        verbose=3,
     )
     random_search.fit(X, y)
 
@@ -251,7 +270,7 @@ write_transactions(os.path.join(out_dir, "variance_errors.csv"), misclassified, 
 # create a tree explainer
 # explainer = shap.TreeExplainer(model)
 # Faster approximation using PermutationExplainer
-X_sample = X[:10000]
+X_sample = X[:10000]  # type: ignore
 explainer = shap.explainers.Permutation(model.predict, X_sample)
 
 logger.info("Calculating SHAP values")
@@ -298,7 +317,11 @@ print(f"Selected feature names: {selected_feature_names}")
 
 # Plot the CV scores vs number of features
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, len(rfecv.cv_results_["mean_test_score"]) + 1), rfecv.cv_results_["mean_test_score"], "o-")
+plt.plot(
+    range(1, len(rfecv.cv_results_["mean_test_score"]) + 1),
+    rfecv.cv_results_["mean_test_score"],
+    "o-",
+)
 plt.xlabel("Number of features")
 plt.ylabel("Cross-validation accuracy")
 plt.title("Accuracy vs. Number of Features")
