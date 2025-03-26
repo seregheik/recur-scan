@@ -107,6 +107,17 @@ def get_percent_transactions_same_amount(transaction: Transaction, all_transacti
     n_same_amount = len([t for t in all_transactions if t.amount == transaction.amount])
     return n_same_amount / len(all_transactions)
 
+def regularity_of_transactions(transaction: Transaction, all_transactions: list[Transaction]) -> float:
+    """Calculate the regularity of transactions based on the number of transactions with the same amount and name Using standard deviation"""
+    same_amount_transactions = [t for t in all_transactions if t.amount == transaction.amount]
+    if not same_amount_transactions:
+        return 0.0
+    amounts = [t.amount for t in same_amount_transactions]
+    mean = sum(amounts) / len(amounts)
+    variance = sum((x - mean) ** 2 for x in amounts) / len(amounts)
+    return variance**0.5
+
+
 
 def get_features(transaction: Transaction, all_transactions: list[Transaction]) -> dict[str, float | int]:
     return {
@@ -125,4 +136,6 @@ def get_features(transaction: Transaction, all_transactions: list[Transaction]) 
         "is_utility": get_is_utility(transaction),
         "is_phone": get_is_phone(transaction),
         "is_always_recurring": get_is_always_recurring(transaction),
+                "regularity_of_transactions": regularity_of_transactions(transaction, all_transactions),
+
     }
