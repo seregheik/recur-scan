@@ -41,7 +41,7 @@ do_hyperparameter_optimization = False  # set to False to use the default hyperp
 n_hpo_iters = 20  # number of hyperparameter optimization iterations
 n_jobs = -1  # number of jobs to run in parallel (set to 1 if your laptop gets too hot)
 
-in_path = "../../Padichat-AI-Chatbot/"
+in_path = "../../recur-scan-data/csv/recur_scan_train - train.csv"
 out_dir = "../../recur-scan-data/reports/"
 
 # %%

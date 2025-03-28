@@ -22,7 +22,9 @@ def get_is_insurance(transaction: Transaction) -> bool:
     """Check if the transaction is an insurance payment."""
     # use a regular expression with boundaries to match case-insensitive insurance
     # and insurance-related terms
-    match = re.search(r"\b(insurance|insur|insuranc)\b", transaction.name, re.IGNORECASE)
+    match = re.search(
+        r"\b(insurance|insur|insuranc)\b", transaction.name, re.IGNORECASE
+    )
     return bool(match)
 
 
@@ -87,9 +89,17 @@ def _get_day(date: str) -> int:
     return int(date.split("-")[2])
 
 
-def get_n_transactions_same_day(transaction: Transaction, all_transactions: list[Transaction], n_days_off: int) -> int:
+def get_n_transactions_same_day(
+    transaction: Transaction, all_transactions: list[Transaction], n_days_off: int
+) -> int:
     """Get the number of transactions in all_transactions that are on the same day of the month as transaction"""
-    return len([t for t in all_transactions if abs(_get_day(t.date) - _get_day(transaction.date)) <= n_days_off])
+    return len(
+        [
+            t
+            for t in all_transactions
+            if abs(_get_day(t.date) - _get_day(transaction.date)) <= n_days_off
+        ]
+    )
 
 
 def get_ends_in_99(transaction: Transaction) -> bool:
@@ -97,12 +107,16 @@ def get_ends_in_99(transaction: Transaction) -> bool:
     return (transaction.amount * 100) % 100 == 99
 
 
-def get_n_transactions_same_amount(transaction: Transaction, all_transactions: list[Transaction]) -> int:
+def get_n_transactions_same_amount(
+    transaction: Transaction, all_transactions: list[Transaction]
+) -> int:
     """Get the number of transactions in all_transactions with the same amount as transaction"""
     return len([t for t in all_transactions if t.amount == transaction.amount])
 
 
-def get_percent_transactions_same_amount(transaction: Transaction, all_transactions: list[Transaction]) -> float:
+def get_percent_transactions_same_amount(
+    transaction: Transaction, all_transactions: list[Transaction]
+) -> float:
     """Get the percentage of transactions in all_transactions with the same amount as transaction"""
     if not all_transactions:
         return 0.0
@@ -119,7 +133,9 @@ def has_min_recurrence_period(
     min_days: int = 60,
 ) -> bool:
     """Check if transactions from the same vendor span at least `min_days`."""
-    vendor_txs = [t for t in all_transactions if t.name.lower() == transaction.name.lower()]
+    vendor_txs = [
+        t for t in all_transactions if t.name.lower() == transaction.name.lower()
+    ]
     if len(vendor_txs) < 2:
         return False
     dates = sorted([_parse_date(t.date) for t in vendor_txs])
@@ -132,14 +148,18 @@ def get_day_of_month_consistency(
     tolerance_days: int = 7,
 ) -> float:
     """Calculate the fraction of transactions within `tolerance_days` of the target day."""
-    vendor_txs = [t for t in all_transactions if t.name.lower() == transaction.name.lower()]
+    vendor_txs = [
+        t for t in all_transactions if t.name.lower() == transaction.name.lower()
+    ]
     if len(vendor_txs) < 2:
         return 0.0
     target_day = _get_day(transaction.date)
     matches = 0
     for t in vendor_txs:
         day_diff = abs(_get_day(t.date) - target_day)
-        if day_diff <= tolerance_days or day_diff >= 28 - tolerance_days:  # Handle month-end
+        if (
+            day_diff <= tolerance_days or day_diff >= 28 - tolerance_days
+        ):  # Handle month-end
             matches += 1
     return matches / len(vendor_txs)
 
@@ -149,7 +169,9 @@ def get_day_of_month_variability(
     all_transactions: list[Transaction],
 ) -> float:
     """Measure consistency of day-of-month (lower = more consistent)."""
-    vendor_txs = [t for t in all_transactions if t.name.lower() == transaction.name.lower()]
+    vendor_txs = [
+        t for t in all_transactions if t.name.lower() == transaction.name.lower()
+    ]
     if len(vendor_txs) < 2:
         return 31.0  # Max possible variability
 
@@ -157,7 +179,7 @@ def get_day_of_month_variability(
     # Handle month-end transitions (e.g., 28th vs 1st)
     adjusted_days = []
     for day in days:
-        if day > 28:  # Treat 28+, 1, 2, 3 as close
+        if day > 28 and day < 31:  # Treat 28+, 1, 2, 3 as close
             adjusted_days.extend([day, day - 31])
         else:
             adjusted_days.append(day)
@@ -167,7 +189,7 @@ def get_day_of_month_variability(
 def get_recurrence_confidence(
     transaction: Transaction,
     all_transactions: list[Transaction],
-    decay_rate: float = 0.5,  # Higher = recent transactions matter more
+    decay_rate: float = 2,  # Higher = recent transactions matter more
 ) -> float:
     """Calculate a confidence score (0-1) based on weighted historical recurrences."""
     vendor_txs = sorted(
@@ -179,17 +201,36 @@ def get_recurrence_confidence(
 
     confidence = 0.0
     for i in range(1, len(vendor_txs)):
-        days_diff = (_parse_date(vendor_txs[i].date) - _parse_date(vendor_txs[i - 1].date)).days
+        days_diff = (
+            _parse_date(vendor_txs[i].date) - _parse_date(vendor_txs[i - 1].date)
+        ).days
         # Weight by decay_rate^(time ago) and normalize
         confidence += (decay_rate**i) * (1.0 if days_diff <= 35 else 0.0)
 
     return confidence / sum(decay_rate**i for i in range(1, len(vendor_txs)))
 
 
-def is_weekday_consistent(transaction: Transaction, all_transactions: list[Transaction]) -> bool:
-    vendor_txs = [t for t in all_transactions if t.name.lower() == transaction.name.lower()]
+def is_weekday_consistent(
+    transaction: Transaction, all_transactions: list[Transaction]
+) -> bool:
+    vendor_txs = [
+        t for t in all_transactions if t.name.lower() == transaction.name.lower()
+    ]
     weekdays = [_parse_date(t.date).weekday() for t in vendor_txs]  # Monday=0, Sunday=6
     return len(set(weekdays)) <= 2  # Allow minor drift (e.g., weekend vs. Monday)
+
+
+def get_median_period(
+    transaction: Transaction, all_transactions: list[Transaction]
+) -> float:
+    vendor_txs = [
+        t for t in all_transactions if t.name.lower() == transaction.name.lower()
+    ]
+    dates = sorted([_parse_date(t.date) for t in vendor_txs])
+    if len(dates) < 2:
+        return 0.0
+    day_diffs = [(dates[i] - dates[i - 1]).days for i in range(1, len(dates))]
+    return float(np.median(day_diffs))  # Median is robust to outliers
 
 
 # def is_recurring_transaction(
@@ -259,28 +300,55 @@ def is_weekday_consistent(transaction: Transaction, all_transactions: list[Trans
 #     return n_recurring / len(vendor_txs) >= threshold
 
 
-def get_features(transaction: Transaction, all_transactions: list[Transaction]) -> dict[str, float | int]:
+def get_features(
+    transaction: Transaction, all_transactions: list[Transaction]
+) -> dict[str, float | int]:
     return {
-        "n_transactions_same_amount": get_n_transactions_same_amount(transaction, all_transactions),
-        "percent_transactions_same_amount": get_percent_transactions_same_amount(transaction, all_transactions),
+        "n_transactions_same_amount": get_n_transactions_same_amount(
+            transaction, all_transactions
+        ),
+        "percent_transactions_same_amount": get_percent_transactions_same_amount(
+            transaction, all_transactions
+        ),
         "ends_in_99": get_ends_in_99(transaction),
         "amount": transaction.amount,
         "same_day_exact": get_n_transactions_same_day(transaction, all_transactions, 0),
-        "same_day_off_by_1": get_n_transactions_same_day(transaction, all_transactions, 1),
-        "same_day_off_by_2": get_n_transactions_same_day(transaction, all_transactions, 2),
-        "14_days_apart_exact": get_n_transactions_days_apart(transaction, all_transactions, 14, 0),
-        "14_days_apart_off_by_1": get_n_transactions_days_apart(transaction, all_transactions, 14, 1),
-        "7_days_apart_exact": get_n_transactions_days_apart(transaction, all_transactions, 7, 0),
-        "7_days_apart_off_by_1": get_n_transactions_days_apart(transaction, all_transactions, 7, 1),
+        "same_day_off_by_1": get_n_transactions_same_day(
+            transaction, all_transactions, 1
+        ),
+        "same_day_off_by_2": get_n_transactions_same_day(
+            transaction, all_transactions, 2
+        ),
+        "14_days_apart_exact": get_n_transactions_days_apart(
+            transaction, all_transactions, 14, 0
+        ),
+        "14_days_apart_off_by_1": get_n_transactions_days_apart(
+            transaction, all_transactions, 14, 1
+        ),
+        "7_days_apart_exact": get_n_transactions_days_apart(
+            transaction, all_transactions, 7, 0
+        ),
+        "7_days_apart_off_by_1": get_n_transactions_days_apart(
+            transaction, all_transactions, 7, 1
+        ),
         "is_insurance": get_is_insurance(transaction),
         "is_utility": get_is_utility(transaction),
         "is_phone": get_is_phone(transaction),
         "is_always_recurring": get_is_always_recurring(transaction),
         # Osaseres features
-        "has_min_recurrence_period": has_min_recurrence_period(transaction, all_transactions),
-        "day_of_month_consistency": get_day_of_month_consistency(transaction, all_transactions),
-        "day_of_month_variability": get_day_of_month_variability(transaction, all_transactions),
-        "recurrence_confidence": get_recurrence_confidence(transaction, all_transactions),
+        "has_min_recurrence_period": has_min_recurrence_period(
+            transaction, all_transactions
+        ),
+        "day_of_month_consistency": get_day_of_month_consistency(
+            transaction, all_transactions
+        ),
+        "day_of_month_variability": get_day_of_month_variability(
+            transaction, all_transactions
+        ),
+        "recurrence_confidence": get_recurrence_confidence(
+            transaction, all_transactions
+        ),
+        "median_period_days": get_median_period(transaction, all_transactions),
         # "is_pareto_recurring": is_pareto_recurring(transaction, all_transactions),
         # "is_recurring_transaction": is_recurring_transaction(transaction, all_transactions),
     }
